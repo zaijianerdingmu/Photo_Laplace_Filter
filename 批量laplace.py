@@ -3,7 +3,34 @@ import argparse    #导入argpase主要是用来命令行运行时参数的配�
 import cv2         #图像处理模块
 import numpy as np
 import torch
- 
+
+
+def laplacian(img):
+
+	# 获取图像尺寸
+	H, W = img.shape
+
+	# 滤波器系数
+	K = np.array([[0., 1., 0.],[1., -4., 1.], [0., 1., 0.]])
+	print(type(img))
+	re = np.zeros_like(img)
+	print(type(re[1,1]))
+	img = img.astype("float")
+	for i in range(1, img.shape[0] - 1):
+		for j in range(1, img.shape[1] - 1):
+			if(i==1 and j==1):
+				print(img[i-1 : i+2, j-1 : j+2])
+				print(K)
+				print((img[i-1 : i+2, j-1 : j+2] * K).sum())
+			re[i, j] = (img[i-1 : i+2, j-1 : j+2] * K).sum()
+			if(i==1 and j==1):
+				print(re[i,j])
+	print("re:")
+	print(re)
+	out = re[1:-1, 1:-1]
+	#out = np.clip(out, 0, 255)
+	return out
+
 #parse args
 parser = argparse.ArgumentParser(description='Downsize images at 2x using bicubic interpolation')    #创建一个参数解析对象，为解析对象添加描述语句，而这个描述语句是当调用parser.print_help()或者运行程序时由于参数不正确(此时python解释器其实也是调用了pring_help()方法)时，会打印这些描述信息
 parser.add_argument("-k", "--keepdims", help="keep original image dimensions in downsampled images", action="store_true")    #为函数添加参数k和参数keepdims，并且设置action="store_true"，也就是当命令行提及到这两个参数的时候，参数设置为true，如果没提及那就是默认值（如果用了default制定了默认值的话）
@@ -14,7 +41,7 @@ parser.add_argument('--laplace_img_dir', type=str, default=r'C:\Users\17865\Desk
 args = parser.parse_args()                                #调用parse_args()方法对参数进行解析；解析成功之后即可使用
  
 color_image_dir = args.color_img_dir              #从参数列表中取出高分辨率图像路径
-laplace_image_dir = args.gray_img_dir              #从参数列表中取出低分辨率图像路径
+laplace_image_dir = args.laplace_img_dir              #从参数列表中取出低分辨率图像路径
  
 print(args.color_img_dir)                      #将热红外热图像路径打印出来
 print(args.laplace_img_dir)                      #将热红外灰度图像路径打印出来
@@ -40,18 +67,8 @@ for filename in os.listdir(color_image_dir):             #遍历热图像文件�
  
     #Read HR image
     color_img = cv2.imread(os.path.join(color_image_dir, filename))  
-    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)    #图像灰度化
-    img_tensor = torch.tensor(img)
-    img_tensor = img_tensor.unsqueeze(0)
-    img_tensor = img_tensor.unsqueeze(0)
-    img_tensor=img_tensor.float()
-    conv= torch.nn.Conv2d(1, 1, (3, 3), stride=1, padding=0, bias=False)  #创造一个拉普拉斯算子
-    conv.weight.data = torch.Tensor([[[[0., 1., 0.],
-                                   [1., -4., 1.],
-                                   [0., 1., 0.]]]])
-    conv.weight.data.requires_grad = False       #冻结拉普拉斯算子的权重
-    img_tensor_conv = conv(img_tensor)
-    out_conv = img_tensor_conv.detach.numpy()
+    img = cv2.cvtColor(color_img, cv2.COLOR_RGB2GRAY)    #图像灰度化
+    out = laplacian(img)
     """
     os.path.join()函数用于路径拼接文件路径,在这里也就是将文件所在目录和文件名拼接在一起，获得文件完整的路径
     cv2.imread:为 opencv-python 包的读取图片的函数,cv2.imread()有两个参数,第一个参数filename是图片路径,第二个参数flag表示图片读取模式,共有三种
@@ -63,7 +80,7 @@ for filename in os.listdir(color_image_dir):             #遍历热图像文件�
     """   
 
  
-    cv2.imwrite(os.path.join(laplace_image_dir, filename.split('.')[0]+ext), out_conv)  #将文件写入准备好的灰度图片文件夹中
+    cv2.imwrite(os.path.join(laplace_image_dir, filename.split('.')[0]+ext), out)  #将文件写入准备好的灰度图片文件夹中
     num = num+1
     print(num)
 

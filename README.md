@@ -1,2 +1,0 @@
-# Photo_Laplace_Filter
-将图片批量进行拉普拉斯滤波处理
