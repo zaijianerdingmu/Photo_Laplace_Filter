@@ -25,18 +25,18 @@ def laplacian(img):
 			re[i, j] = (img[i-1 : i+2, j-1 : j+2] * K).sum()
 			if(i==1 and j==1):
 				print(re[i,j])
-	print("re:")
-	print(re)
+	#print("re:")
+	#print(re)
 	out = re[1:-1, 1:-1]
 	#out = np.clip(out, 0, 255)
-	return out
+	return re
 
 #parse args
 parser = argparse.ArgumentParser(description='Downsize images at 2x using bicubic interpolation')    #创建一个参数解析对象，为解析对象添加描述语句，而这个描述语句是当调用parser.print_help()或者运行程序时由于参数不正确(此时python解释器其实也是调用了pring_help()方法)时，会打印这些描述信息
 parser.add_argument("-k", "--keepdims", help="keep original image dimensions in downsampled images", action="store_true")    #为函数添加参数k和参数keepdims，并且设置action="store_true"，也就是当命令行提及到这两个参数的时候，参数设置为true，如果没提及那就是默认值（如果用了default制定了默认值的话）
-parser.add_argument('--color_img_dir', type=str, default=r'C:\Users\17865\Desktop\Laplace_Filter\input',        #设置高分辨率图片路径参数
+parser.add_argument('--color_img_dir', type=str, default=r'C:\Users\WangChun\Desktop\Laplace_Filter\input',        #设置高分辨率图片路径参数
                     help='path to Color image dir')
-parser.add_argument('--laplace_img_dir', type=str, default=r'C:\Users\17865\Desktop\Laplace_Filter\result',       #设置低分辨率路径参数
+parser.add_argument('--laplace_img_dir', type=str, default=r'C:\Users\WangChun\Desktop\Laplace_Filter\result',       #设置低分辨率路径参数
                     help='path to desired output dir for grayed images')
 args = parser.parse_args()                                #调用parse_args()方法对参数进行解析；解析成功之后即可使用
  
